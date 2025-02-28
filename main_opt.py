@@ -2,7 +2,7 @@
 Author: guo_MateBookPro 867718012@qq.com
 Date: 2023-07-19 16:05:26
 LastEditors: guo-4060ti 867718012@qq.com
-LastEditTime: 2024-11-07 10:33:08
+LastEditTime: 2024-11-12 23:33:25
 FilePath: /总程序/main_opt.py
 Description: 人一生会遇到约2920万人,两个人相爱的概率是0.000049,所以你不爱我,我不怪你.
 Copyright (c) 2023 by ${git_name} email: ${git_email}, All Rights Reserved.
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
 
 
-    main_alg(1,8000,1/6)
+    main_alg(1,1100,1/6)
 
 
     # pd.DataFrame(dict([(k, pd.Series(v)) for k, v in res.items()])).to_csv("res_data/test.csv")
