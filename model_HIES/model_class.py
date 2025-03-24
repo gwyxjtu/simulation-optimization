@@ -2,8 +2,8 @@
 Author: working-guo 867718012@qq.com
 Date: 2023-07-18 16:03:36
 LastEditors: guo-4060ti 867718012@qq.com
-LastEditTime: 2024-11-12 23:44:38
-FilePath: /总程序/model_HIES/model_class.py
+LastEditTime: 2025-03-22 20:15:54
+FilePath: \总程序\model_HIES\model_class.py
 Description: 人一生会遇到约2920万人,两个人相爱的概率是0.000049,所以你不爱我,我不怪你.
 Copyright (c) 2023 by ${git_name} email: ${git_email}, All Rights Reserved.
 '''
@@ -380,6 +380,7 @@ class MultiTime_model:
             'H_hs':self.MP.getVarByName('H_hs').x,
             'P_eb':self.MP.getVarByName('P_eb').x,
             'G_ht':self.MP.getVarByName('G_ht').x,
+            'Obj':self.MP.getObjective().getValue(),
         }
 
         items = list(self.planning_res.keys())
@@ -472,7 +473,6 @@ class MultiTime_model:
         pd.DataFrame(self.planning_res,index=[0]).to_csv("ramp"+str(int(1/self.ramp_up_rate))+"-devicecap.csv")
         pprint.pprint(self.planning_res)
 
-    
 
     def simulation_heat(self,operation_res:list,operation_res_5min:list,scenario_s:object,operation_revise:dict,num:int,iter=0) -> dict:
         """在子问题中调用，热传输过程仿真，返回每一时段每个设备的能量违反度。序贯仿真fc和hp的设备
@@ -487,6 +487,9 @@ class MultiTime_model:
         """
 
         T_dict,mass_dict = simulation_pipe(operation_res,scenario_s,operation_revise)
+        # save to csv
+        pd.DataFrame(T_dict).to_csv("res/"+str(num)+"-T.csv")
+        pd.DataFrame(mass_dict).to_csv("res/"+str(num)+"-mass.csv")
         cop_hp = simulation_hp(T_dict['hp'])
         cop_fc, Electrothermal = simulation_fc(self.planning_res['P_fc'], operation_res_5min['p_fc'])
         # 每个设备温度界限参数
@@ -514,6 +517,7 @@ class MultiTime_model:
             'T_fc':T_dict['fc'],
             'T_hp':T_dict['hp'],
             'T_ht':T_dict['ht'],
+            'T_ld':T_dict['ld'],
             'm_fc':mass_dict['fc'],
             'm_hp':mass_dict['hp'],
             'm_ht':mass_dict['ht'],

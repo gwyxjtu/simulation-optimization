@@ -2,8 +2,8 @@
 Author: guo_MateBookPro 867718012@qq.com
 Date: 2023-07-19 16:05:26
 LastEditors: guo-4060ti 867718012@qq.com
-LastEditTime: 2024-11-12 23:33:25
-FilePath: /总程序/main_opt.py
+LastEditTime: 2025-03-24 09:52:09
+FilePath: \总程序\main_opt.py
 Description: 人一生会遇到约2920万人,两个人相爱的概率是0.000049,所以你不爱我,我不怪你.
 Copyright (c) 2023 by ${git_name} email: ${git_email}, All Rights Reserved.
 '''
@@ -86,7 +86,8 @@ def main_alg(pv_number:int, pv_lb:int, ramp_rate:float) -> None:
         pd.DataFrame(error).to_csv("res/error.csv")
         MultiTime_m.solve_MP(wb,capacity,iter)
         MultiTime_m.get_MP_result(iter)
-
+    if iter>days*30:
+        send('计算完毕',receivers,"ok",["res_data/device_cap.csv"])
         
 
 # def main_alg_multiprocess(pv_number:int,ramp_rate:float) -> None:

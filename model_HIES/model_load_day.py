@@ -2,8 +2,8 @@
 Author: guo_idpc
 Date: 2023-02-24 15:03:18
 LastEditors: guo-4060ti 867718012@qq.com
-LastEditTime: 2024-11-08 11:38:56
-FilePath: /copt_multi-time/model_HIES/model_load_day.py
+LastEditTime: 2025-03-24 10:27:09
+FilePath: \总程序\model_HIES\model_load_day.py
 Description: 人一生会遇到约2920万人,两个人相爱的概率是0.000049,所以你不爱我,我不怪你.
 
 Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
@@ -51,8 +51,14 @@ def get_data():
     return g_scenario,water_scenario,ele_scenario,pv_scenario_3
 
 def get_scenario_data(g_scenario,water_scenario,ele_scenario,pv_scenario_3):
-    scenario_days = [33,46,73,106,134,165,195,226,257,288,318,348]
+    # 生成全年12个月的代表日索引（示例数据，需按实际数据结构调整）
+    # month_days = [31,28,31,30,31,30,31,31,30,31,30,31]
+    # interval = 12 // days
+    # scenario_days = [sum(month_days[:i*interval]) for i in range(days)]
+    scenario_days = list(range(10,365,365//days))
+    # scenario_days = [33,46,73,106,134,165,195,226,257,288,318,348]
     g_demand = [g_scenario[d] for d in scenario_days]
+    # g_demand = [[2800 if g_demand[d][i] > 2800 else g_demand[d][i] for i in range(len(g_demand[d]))] for d in range(days)]
     water_load = [water_scenario[d] for d in scenario_days]
     ele_load = [ele_scenario[d] for d in scenario_days]
     pv_3 = [[pv_scenario_3[i][d] for d in scenario_days] for i in range(3)]
