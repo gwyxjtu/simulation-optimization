@@ -12,7 +12,7 @@ Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
 import pandas as pd
 import csv
 from guo_method.guo_decorator import exception_handler
-days=12
+days=24
 
 def get_all_scenario(data,day):
     # 按天切割全部场景

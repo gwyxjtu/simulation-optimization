@@ -2,7 +2,7 @@
 Author: guo_MateBookPro 867718012@qq.com
 Date: 2023-07-19 16:05:26
 LastEditors: guo-4060ti 867718012@qq.com
-LastEditTime: 2025-03-24 09:52:09
+LastEditTime: 2025-03-25 11:08:59
 FilePath: \总程序\main_opt.py
 Description: 人一生会遇到约2920万人,两个人相爱的概率是0.000049,所以你不爱我,我不怪你.
 Copyright (c) 2023 by ${git_name} email: ${git_email}, All Rights Reserved.
@@ -55,35 +55,26 @@ def main_alg(pv_number:int, pv_lb:int, ramp_rate:float) -> None:
     fail_case = days
     operation_revise = {'fail':False}
 
-    error = []
+    error = pd.DataFrame(columns=[f'Scenario{i+1}' for i in range(all_scenario.days)])
     while fail_case > 0:
     #while iter<=200:
         fail_case = 0
         # for sub_s in all_scenario.sub_scenario:
-        error_s =  []
+        error_s = pd.DataFrame(columns=[f'Scenario{i+1}' for i in range(all_scenario.days)])
         for i in range(all_scenario.days):
-            #if i==1:
-
             operation_revise = MultiTime_m.simulation_heat(MultiTime_m.operation_res[i],MultiTime_m.operation_res_5min[i],all_scenario.sub_scenario[i],operation_revise,i+1,iter)
-            # 得吧类内部的属性重新引入因为没法确定i第几个场景
-            # exit(0)
             if operation_revise['fail'] == False:
                 continue
             
             error_sum = MultiTime_m.add_cut(MultiTime_m.operation_res[i],all_scenario.sub_scenario[i],operation_revise,i)
-            error_s.append(error_sum)
-            #SP_operation_res=MultiTime_m.SP_result_debug(feasible_SP[1],all_scenario.sub_scenario[i])
-            #MultiTime_m.simulation_heat(SP_operation_res[1][i],SP_operation_res[0][i],all_scenario.sub_scenario[i],operation_revise,i)
+            error_s.loc[iter, f'Scenario{i+1}'] = error_sum
             
-            # 哦tmd每次cut后都得重新算一遍才能get
-            # if feasible_SP[0] == 0:
             fail_case += 1
 
-            #break
         iter=iter+1
-        error.append(error_s)
+        error = pd.concat([error, error_s])
         
-        pd.DataFrame(error).to_csv("res/error.csv")
+        error.to_csv("res/error.csv")
         MultiTime_m.solve_MP(wb,capacity,iter)
         MultiTime_m.get_MP_result(iter)
     if iter>days*30:
