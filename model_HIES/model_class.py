@@ -2,8 +2,8 @@
 Author: working-guo 867718012@qq.com
 Date: 2023-07-18 16:03:36
 LastEditors: guo-4060ti 867718012@qq.com
-LastEditTime: 2024-11-12 23:44:38
-FilePath: /总程序/model_HIES/model_class.py
+LastEditTime: 2025-03-29 09:28:55
+FilePath: \总程序\model_HIES\model_class.py
 Description: 人一生会遇到约2920万人,两个人相爱的概率是0.000049,所以你不爱我,我不怪你.
 Copyright (c) 2023 by ${git_name} email: ${git_email}, All Rights Reserved.
 '''
@@ -385,7 +385,7 @@ class MultiTime_model:
         items = list(self.planning_res.keys())
         for i in range(len(items)):
             sheet.write(num+1, i, self.planning_res[items[i]])
-        filename='容量记录'+'.xls'
+        filename='res/容量记录'+'.xls'
         wb.save(filename)
 
 
@@ -466,10 +466,10 @@ class MultiTime_model:
             "C_RE": self.MP.getVarByName('C_RE').x,
             "opex": self.MP.getVarByName('opex').x,
         }
-        pd.DataFrame(res_5min).to_csv("ramp"+str(int(1/self.ramp_up_rate))+"-5min.csv")
-        pd.DataFrame(res_hour).to_csv("ramp"+str(int(1/self.ramp_up_rate))+"-hour.csv")
-        pd.DataFrame(res_obj,index=[0]).to_csv("ramp"+str(int(1/self.ramp_up_rate))+"-obj.csv")
-        pd.DataFrame(self.planning_res,index=[0]).to_csv("ramp"+str(int(1/self.ramp_up_rate))+"-devicecap.csv")
+        pd.DataFrame(res_5min).to_csv("res/ramp"+str(int(1/self.ramp_up_rate))+"-5min.csv")
+        pd.DataFrame(res_hour).to_csv("res/ramp"+str(int(1/self.ramp_up_rate))+"-hour.csv")
+        pd.DataFrame(res_obj,index=[0]).to_csv("res/ramp"+str(int(1/self.ramp_up_rate))+"-obj.csv")
+        pd.DataFrame(self.planning_res,index=[0]).to_csv("res/ramp"+str(int(1/self.ramp_up_rate))+"-devicecap.csv")
         pprint.pprint(self.planning_res)
 
     
@@ -536,9 +536,9 @@ class MultiTime_model:
             else:
                 crucial_data.write(1, i, data_recording[items[i]])
         if iter==0:
-            filename = '原始温度、能效比记录_场景'+str(num)+ '.xls'
+            filename = 'res/原始温度、能效比记录_场景'+str(num)+ '.xls'
         else:
-            filename = '温度、能效比记录_迭代_场景'+str(num)+'.xls'
+            filename = 'res/温度、能效比记录_迭代_场景'+str(num)+'.xls'
         wb.save(filename)
         
 
@@ -568,7 +568,7 @@ class MultiTime_model:
             'g_rh':[SP.getVarByName(f'g_rh({24*d + i})').x for i in range(period)],
         } for d in range(scenario_s.days)]
 
-        pd.DataFrame(res_hour).to_csv("SP_debug_hour.csv")
+        pd.DataFrame(res_hour).to_csv("res/SP_debug_hour.csv")
 
         return [res_5min,res_hour]
 
