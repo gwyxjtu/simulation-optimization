@@ -1,0 +1,23 @@
+{
+  "n_days": 48,
+  "smoke": false,
+  "max_iter": 20,
+  "n_rounds": 21,
+  "stop_reason": null,
+  "final_obj": 4102374.0889244415,
+  "final_infeasible": 26,
+  "total_s": 395.6715972919483,
+  "peak_rss_mb": 3115.25,
+  "timing_csv": "res/pho_timing_d48_pho.csv",
+  "scenario_days_json": "res/pho_scenario_days_d48_pho.json",
+  "capacities": {
+    "P_fc": 678.5304528477076,
+    "P_el": 201.19723905967155,
+    "P_pv": 1100.0,
+    "P_hp": 383.75333599865024,
+    "P_bs": 390.5958017183644,
+    "H_hs": 121.64648071422673,
+    "P_eb": 300.2823719850018,
+    "G_ht": 6120.65792732371
+  }
+}

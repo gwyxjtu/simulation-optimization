@@ -49,7 +49,7 @@ def simulation_fc(P_fc, p_fc):
         "R": 0,
         "JMax": 1.5,
         "Name": "Amphlett_Test"}
-    data=Static_Analysis(InputMethod=Test_Vector,TestMode=True,PrintMode=True,ReportMode=False)
+    data=Static_Analysis(InputMethod=Test_Vector,TestMode=True,PrintMode=False,ReportMode=False)
     fc_df = pd.DataFrame(data)
     eff, Electrothermal = np.array([]), np.array([])
     for i in range(len(p_fc)):

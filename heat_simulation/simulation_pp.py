@@ -7,7 +7,6 @@ FilePath: /copt_multi-time/heat_simulation/simulation_pp.py
 Description: 人一生会遇到约2920万人,两个人相爱的概率是0.000049,所以你不爱我,我不怪你.
 Copyright (c) 2023 by ${git_name} email: ${git_email}, All Rights Reserved.
 '''
-from re import T
 import pandapipes as pp
 import pprint
 import pandapipes.plotting as plot
@@ -49,10 +48,10 @@ def construct_network() -> object:
     pp.create_heat_exchanger(net, from_junction=j10, to_junction=j11, diameter_m=400e-3, qext_w = 3000000)
     pp.create_heat_exchanger(net, from_junction=j12, to_junction=j13, diameter_m=200e-3, qext_w = 3000000)
 
-    pp.create_valve(net, j6, j9, opened = True, diameter_m=2e-3, name="valve1")
-    pp.create_valve(net, j7, j9, opened = True, diameter_m=2e-3, name="valve2")
-    pp.create_valve(net, j8, j9, opened = True, diameter_m=2e-3, name="valve3")
-    pp.create_valve(net, j10, j12, opened = True, diameter_m=2e-3, name="valve4")
+    pp.create_valve(net, j6, j9, et="ju", opened=True, inner_diameter_mm=2, name="valve1")
+    pp.create_valve(net, j7, j9, et="ju", opened=True, inner_diameter_mm=2, name="valve2")
+    pp.create_valve(net, j8, j9, et="ju", opened=True, inner_diameter_mm=2, name="valve3")
+    pp.create_valve(net, j10, j12, et="ju", opened=True, inner_diameter_mm=2, name="valve4")
     # pp.create_flow_control(net, j6, j15, controlled_mdot_kg_per_s = 0.1, diameter_m = 2e-3, control_active = True)
     # pp.create_flow_control(net, j7, j16, controlled_mdot_kg_per_s = 0.1, diameter_m = 2e-3, control_active = True)
     # pp.create_flow_control(net, j8, j17, controlled_mdot_kg_per_s = 0.1, diameter_m = 2e-3, control_active = True)
@@ -196,7 +195,7 @@ def simulation_pipe(operation_res:dict,scenario_s:object,operation_revise:dict) 
     #                               data_source=DFData(pd.DataFrame(list(map(list, zip(*valve_control))), columns=net.flow_control.index.values.astype(str))),
     #                               profile_name=net.flow_control.index.values.astype(str))
     ow = ow_print(net,period)
-    run_timeseries(net, range(period), mode='all') # hydraulics
+    run_timeseries(net, range(period), mode='sequential') # hydraulics
     # print_res(net,ow)
     temp_calc = lambda x:x-273.15
     T_dict = {

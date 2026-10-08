@@ -47,7 +47,8 @@ def main_alg(pv_number:int, pv_lb:int, ramp_rate:float) -> None:
         pv_number (int): _description_
         ramp_rate (float): _description_
     """
-    all_scenario = Scenario_all_day(days,pv_number,*get_load())
+    g_demand, ele_load, water_load, pv_3, _scenario_days = get_load()
+    all_scenario = Scenario_all_day(days,pv_number,g_demand,ele_load,water_load,pv_3)
     MultiTime_m = MultiTime_model(pv_lb, ramp_rate) 
     MP = MultiTime_m.formulate_MP(all_scenario.main_scenario)
     MultiTime_m.solve_MP(wb,capacity)
@@ -96,7 +97,8 @@ def main_alg(pv_number:int, pv_lb:int, ramp_rate:float) -> None:
 #         pv_number (int): _description_
 #         ramp_rate (float): _description_
 #     """
-#     all_scenario = Scenario_all_day(days,pv_number,*get_load())
+#     g_demand, ele_load, water_load, pv_3, _scenario_days = get_load()
+    all_scenario = Scenario_all_day(days,pv_number,g_demand,ele_load,water_load,pv_3)
 #     MultiTime_m = MultiTime_model(ramp_rate)
 #     MP = MultiTime_m.formulate_MP(all_scenario.main_scenario)
 #     MultiTime_m.solve_MP()

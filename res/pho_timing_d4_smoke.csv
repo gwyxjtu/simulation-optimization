@@ -1,0 +1,2 @@
+round,stage,obj,n_infeasible,sim_excess_kwh,sp_obj_sum,t_form_s,t_mp_s,t_sim_s,t_sp_s,t_round_s,t_total_s,rss_mb,failed_days
+0,EBO,2253554.813775561,4,519.7032193108363,0.0,0.12612783291842788,0.3973494169767946,3.8718638338614255,0.0,4.26921325083822,4.395565334009007,582.890625,0;1;2;3

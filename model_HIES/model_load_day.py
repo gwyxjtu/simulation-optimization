@@ -11,8 +11,32 @@ Copyright (c) 2023 by ${git_name_email}, All Rights Reserved.
 # from ast import main
 import pandas as pd
 import csv
+import numpy as np
 from guo_method.guo_decorator import exception_handler
 days=12
+SAMPLE_SEED = 2024
+
+# 0-based day-of-year, Yulin / northern meteorological seasons.
+SEASONS = [
+    list(range(0, 59)) + list(range(334, 365)),  # winter DJF
+    list(range(59, 151)),                       # spring MAM
+    list(range(151, 243)),                      # summer JJA
+    list(range(243, 334)),                      # autumn SON
+]
+
+
+def sample_scenario_days(n_days: int, seed: int = SAMPLE_SEED) -> list:
+    """Season-stratified sample. Same seed => 4 ⊂ 12 ⊂ 48 ⊂ ... by per-season prefix."""
+    if n_days < 1 or n_days > 365:
+        raise ValueError(f"n_days must be in 1..365, got {n_days}")
+    rng = np.random.default_rng(seed)
+    shuffled = [rng.permutation(season).tolist() for season in SEASONS]
+    base, rem = divmod(n_days, 4)
+    chosen = []
+    for i, season in enumerate(shuffled):
+        k = base + (1 if i < rem else 0)
+        chosen.extend(season[:k])
+    return sorted(int(d) for d in chosen)
 
 def get_all_scenario(data,day):
     # 按天切割全部场景
@@ -50,19 +74,23 @@ def get_data():
     pv_scenario_3 = [pv_5min_88,pv_5min_76,pv_5min_113]
     return g_scenario,water_scenario,ele_scenario,pv_scenario_3
 
-def get_scenario_data(g_scenario,water_scenario,ele_scenario,pv_scenario_3):
-    scenario_days = [33,46,73,106,134,165,195,226,257,288,318,348]
+def get_scenario_data(g_scenario,water_scenario,ele_scenario,pv_scenario_3, n_days=None, seed=SAMPLE_SEED):
+    if n_days is None:
+        scenario_days = [33,46,73,106,134,165,195,226,257,288,318,348]
+    else:
+        scenario_days = sample_scenario_days(n_days, seed)
     g_demand = [g_scenario[d] for d in scenario_days]
     water_load = [water_scenario[d] for d in scenario_days]
     ele_load = [ele_scenario[d] for d in scenario_days]
     pv_3 = [[pv_scenario_3[i][d] for d in scenario_days] for i in range(3)]
-    return g_demand,water_load,ele_load,pv_3
+    return g_demand,water_load,ele_load,pv_3, scenario_days
 
-def get_load():
+def get_load(n_days=None, seed=SAMPLE_SEED):
     g_scenario,water_scenario,ele_scenario,pv_scenario_3 = get_data()
-    g_demand,water_load,ele_load,pv_3 = get_scenario_data(g_scenario,water_scenario,ele_scenario,pv_scenario_3)
-    
-    return g_demand, ele_load, water_load, pv_3
+    g_demand,water_load,ele_load,pv_3, scenario_days = get_scenario_data(
+        g_scenario,water_scenario,ele_scenario,pv_scenario_3, n_days=n_days, seed=seed
+    )
+    return g_demand, ele_load, water_load, pv_3, scenario_days
 
 
 if __name__ == "__main__":

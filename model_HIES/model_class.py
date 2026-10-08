@@ -24,13 +24,15 @@ from itertools import islice
 import math
 
 class MultiTime_model:
-    def __init__(self, pv_lb:int, ramp_up_rate:float) -> None:
+    def __init__(self, pv_lb:int, ramp_up_rate:float, save_xls:bool=False, dump_debug:bool=True) -> None:
         """self 存一些MP问题的结果
         """
         self.ramp_up_rate = ramp_up_rate
         self.planning_res = None
         self.operation_res = None
         self.pv_lb = pv_lb
+        self.save_xls = save_xls
+        self.dump_debug = dump_debug
         pass
 
     def __re(self, year, life):
@@ -366,10 +368,10 @@ class MultiTime_model:
         """主要是更新self.planning_res 用于增加cut
         """
         self.MP.setParam(COPT.Param.RelGap, 0.001)
+        self.MP.setParam(COPT.Param.Logging, 0)
         self.MP.solve()
-        if self.MP.status == 2:
-            self.MP.computeIIS() 
-            self.MP.writeIIS("example.iis")
+        if self.MP.status != COPT.OPTIMAL:
+            raise RuntimeError(f"MP not optimal, status={self.MP.status}")
         period = 24
         self.planning_res = {
             'P_fc':self.MP.getVarByName('P_fc').x,
@@ -400,10 +402,12 @@ class MultiTime_model:
             'g_total_demand':[self.MP_water_load[24*d + i] + self.MP_g_demand[24*d + i] for i in range(period)],
             'g_rh':[self.MP.getVarByName(f'g_rh({24*d + i})').x for i in range(period)],
         } for d in range(self.MP_days)]
+        # p_fc is 5-min over the concatenated horizon: day d occupies
+        # [288*d, 288*(d+1)), not [12*d, 12*d+288).
+        n_fc = period * 12
         self.operation_res_5min = [{
-            'p_fc':[self.MP.getVarByName(f'p_fc({12*d + i})').x for i in range(period*12)],
+            'p_fc':[self.MP.getVarByName(f'p_fc({n_fc * d + i})').x for i in range(n_fc)],
         } for d in range(self.MP_days)]
-        1
 
     def get_MP_result(self,num=0) -> None:
 
@@ -510,36 +514,37 @@ class MultiTime_model:
             # 'g_rh':[c_kWh*1000*mass_dict['rh'][i]*(T_dict['rh'][i]-T_rh_max) if T_dict['rh'][i]>T_rh_max else 0 for i in range(len(T_dict['rh']))],
         }
 
-        data_recording={
-            'T_fc':T_dict['fc'],
-            'T_hp':T_dict['hp'],
-            'T_ht':T_dict['ht'],
-            'm_fc':mass_dict['fc'],
-            'm_hp':mass_dict['hp'],
-            'm_ht':mass_dict['ht'],
-            'g_fc':operation_res['g_fc'],
-            'g_hp':operation_res['g_hp'],
-            'cop_fc':cop_fc,
-            'cop_hp':cop_hp,
-            'g_fc_revise':operation_revise['g_fc'],
-            'g_hp_revise':operation_revise['g_hp'],
-            'g_ht_revise':operation_revise['g_ht'],
-        }
-        wb = xlwt.Workbook()
-        crucial_data = wb.add_sheet('温度、能效比')
-        items = list(data_recording.keys())
-        for i in range(len(items)):
-            crucial_data.write(0, i, items[i])
-            if type(data_recording[items[i]]) == list or type(data_recording[items[i]])==type(T_dict['fc']):
-                for j in range(len(data_recording[items[i]])):
-                    crucial_data.write(j+1, i, (data_recording[items[i]])[j])
+        if self.save_xls:
+            data_recording={
+                'T_fc':T_dict['fc'],
+                'T_hp':T_dict['hp'],
+                'T_ht':T_dict['ht'],
+                'm_fc':mass_dict['fc'],
+                'm_hp':mass_dict['hp'],
+                'm_ht':mass_dict['ht'],
+                'g_fc':operation_res['g_fc'],
+                'g_hp':operation_res['g_hp'],
+                'cop_fc':cop_fc,
+                'cop_hp':cop_hp,
+                'g_fc_revise':operation_revise['g_fc'],
+                'g_hp_revise':operation_revise['g_hp'],
+                'g_ht_revise':operation_revise['g_ht'],
+            }
+            wb = xlwt.Workbook()
+            crucial_data = wb.add_sheet('温度、能效比')
+            items = list(data_recording.keys())
+            for i in range(len(items)):
+                crucial_data.write(0, i, items[i])
+                if type(data_recording[items[i]]) == list or type(data_recording[items[i]])==type(T_dict['fc']):
+                    for j in range(len(data_recording[items[i]])):
+                        crucial_data.write(j+1, i, (data_recording[items[i]])[j])
+                else:
+                    crucial_data.write(1, i, data_recording[items[i]])
+            if iter==0:
+                filename = 'res/原始温度、能效比记录_场景'+str(num)+ '.xls'
             else:
-                crucial_data.write(1, i, data_recording[items[i]])
-        if iter==0:
-            filename = 'res/原始温度、能效比记录_场景'+str(num)+ '.xls'
-        else:
-            filename = 'res/温度、能效比记录_迭代_场景'+str(num)+'.xls'
-        wb.save(filename)
+                filename = 'res/温度、能效比记录_迭代_场景'+str(num)+'.xls'
+            wb.save(filename)
         
 
         operation_revise['fail'] = True if max(operation_revise['g_fc'])>0 or max(operation_revise['g_hp'])>0 or max(operation_revise['g_ht'])>0 else False
@@ -554,7 +559,7 @@ class MultiTime_model:
         period = 24
 
         res_5min = [{
-            'p_fc':[SP.getVarByName(f'p_fc({12*d + i})').x for i in range(period_ele)],
+            'p_fc':[SP.getVarByName(f'p_fc({period_ele * d + i})').x for i in range(period_ele)],
         } for d in range(scenario_s.days)]
         res_hour = [{
             'g_fc':[SP.getVarByName(f'g_fc_hour({24*d + i})').x for i in range(period)],
@@ -620,22 +625,25 @@ class MultiTime_model:
         ## 约束的对偶,增加cut
         # SP.setParam(COPT.Param.Dualize,1)
         # 求解线性模型，获得对偶值
+        SP.setParam(COPT.Param.Logging, 0)
         SP.solveLP()
         if SP.status==COPT.INFEASIBLE:
-            SP.computeIIS()
-            SP.writeIIS('opmodel.ilp')
+            if self.dump_debug:
+                SP.computeIIS()
+                SP.writeIIS('opmodel.ilp')
+            raise RuntimeError("SP infeasible")
 
         #print('\n'+'当前误差为'+str(SP.objVal)+'\n')
 
         feasible_SP = 1 if SP.objVal == 0 else 0
         if feasible_SP:
             return SP.objVal
-        self.SP_result_debug(SP,scenario_s)
+        if self.dump_debug:
+            self.SP_result_debug(SP,scenario_s)
         
         g_fc_MP=[self.MP.getVarByName(f'g_fc_hour({i+num*24})') for i in range(period)]
         g_hp_MP=[self.MP.getVarByName(f'g_hp({i+num*24})') for i in range(period)]
         g_ht_MP=[self.MP.getVarByName(f'g_ht_di({i+num*24})') for i in range(period)]
-        1
         P_pv = self.MP.getVarByName('P_pv')
         P_fc = self.MP.getVarByName('P_fc')
         P_hp = self.MP.getVarByName('P_hp')

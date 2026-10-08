@@ -33,7 +33,7 @@ class Scenario_all_day:
         self.g_demand = g_demand[:days]
         self.ele_load = ele_load[:days]
         self.water_load = water_load[:days]
-        self.pv_3 = pv_3
+        self.pv_3 = [[trace[d] for d in range(days)] for trace in pv_3]
         self.pv_number = pv_number
         self.days = days
 

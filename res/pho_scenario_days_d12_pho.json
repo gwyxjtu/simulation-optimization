@@ -1,0 +1,19 @@
+{
+  "n_days": 12,
+  "seed": 2024,
+  "scenario_days": [
+    11,
+    17,
+    95,
+    121,
+    126,
+    165,
+    222,
+    238,
+    250,
+    261,
+    268,
+    346
+  ],
+  "nested_note": "same seed => 4 subset 12 subset 48"
+}
